@@ -188,6 +188,13 @@ public class Model {
             }
             System.out.println(AFDstate.getStates());
         });
+        System.out.println("Hola");
+        System.out.println("Hola");
+        System.out.println("Hola");
+        System.out.println("Hola");
+        System.out.println("Hola");
+        System.out.println("Hola");
+        
 
     }
 
