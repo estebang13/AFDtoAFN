@@ -188,11 +188,6 @@ public class Model {
             }
             System.out.println(AFDstate.getStates());
         });
-        System.out.println("/n/nTransiciones/n/n");
-
-        //transicionesAFD.stream().forEach((AFDstate) -> {
-        //    System.out.println(AFDstate.toString());
-        //});
 
     }
 
