@@ -9,7 +9,6 @@ import java.util.List;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -27,6 +26,7 @@ public class Model {
     private ArrayList<String>[][] transicionesAFND;
     private EstadoAFND EstadoInicialAFND;
     private ArrayList<EstadoAFND> estadosFinalesAFND;
+    private boolean esAFND;
     private boolean tieneEpsilon;
     private static Model model;
     private ArrayList<EstadoAFD> estadosAFD;
@@ -39,26 +39,52 @@ public class Model {
     private int contador;
 
     private Model() {
-        estadosAFND = new ArrayList<>();
-        alfabeto = new ArrayList<>();
-        estadosAFD = new ArrayList<>();
-        estadosFinalesAFND = new ArrayList<>();
-        transicionesAFD = new ArrayList<>();
-        finalStates = new ArrayList<>();
-        noFinalStates = new ArrayList<>();
-        subConjuntos = new ArrayList<>();
-        auxStates = new ArrayList<>();
-        tieneEpsilon = false;
-        contador = 0;
+        this.estadosAFND = new ArrayList<>();
+        this.alfabeto = new ArrayList<>();
+        this.estadosAFD = new ArrayList<>();
+        this.estadosFinalesAFND = new ArrayList<>();
+        this.transicionesAFD = new ArrayList<>();
+        this.finalStates = new ArrayList<>();
+        this.noFinalStates = new ArrayList<>();
+        this.subConjuntos = new ArrayList<>();
+        this.auxStates = new ArrayList<>();
+        this.esAFND = false;
+        this.tieneEpsilon = false;
+        this.contador = 0;
     }
 
     public static Model getInstanceOf() {
         return (model == null) ? model = new Model() : model;
     }
 
+    public void ejecutarPrograma() {
+        cargarAFND();
+        if (esAFND) {
+            System.out.println("Es un automata AFND");
+            convertirAFNDaAFD();
+        } else {
+            System.out.println("Es un automata AFD");
+            cargarAFD();
+        }
+
+//        estadosAFD.stream().forEach((AFDstate) -> {
+//            if (AFDstate.isEsEstadoInicial()) {
+//                System.out.print("Este estado es inicial\t");
+//            }
+//            if (AFDstate.isEsEstadoFinal()) {
+//                System.out.print("Este estado es final\t");
+//            }
+//        });
+//
+//        transicionesAFD.stream().forEach((AFDstate) -> {
+//            System.out.println("From: " + AFDstate.getIdStateFrom() + ", To:" + AFDstate.getIdStateTo()
+//                    + " with: " + AFDstate.getLetter());
+//        });
+    }
+
     public void cargarAFND() {
         SAXBuilder builder = new SAXBuilder();
-        File xmlFile = new File("//Users//estebanguerrero//Desktop//Proyecto1Paradigmas//ejemplo.jff");
+        File xmlFile = new File("C:\\Users\\brgma_000\\Desktop\\ejemploAFD.jff");
         try {
             Document document = (Document) builder.build(xmlFile);
             Element rootNode = document.getRootElement();
@@ -95,9 +121,14 @@ public class Model {
 
                 if (letter.equals("")) {
                     transicionesAFND[buscarPosEstado(stateFrom)][buscarPosEstado(stateTo)].add("E");
+                    esAFND = true;
                     tieneEpsilon = true;
                 } else {
                     transicionesAFND[buscarPosEstado(stateFrom)][buscarPosEstado(stateTo)].add(letter);
+                    System.out.println(transicionesAFND[buscarPosEstado(stateFrom)][buscarPosEstado(stateTo)]);
+                    if (transicionesAFND[buscarPosEstado(stateFrom)][buscarPosEstado(stateTo)].size() > 1) {
+                        esAFND = true;
+                    }
                 }
                 if (!alfabeto.contains(letter)) {
                     alfabeto.add(letter);
@@ -116,13 +147,21 @@ public class Model {
 
         EstadoAFD InitialStateAFD = new EstadoAFD();
 
-        int i = buscarPosEstado(EstadoInicialAFND.getId());
+        int i;
 
-        for (int j = 0; j < transicionesAFND[i].length; j++) {
-            if (transicionesAFND[i][j].contains("E")) {
-                InitialStateAFD.getStates().add(estadosAFND.get(j));
-                buscarLambdaConeccion(InitialStateAFD, j);
+        if (tieneEpsilon) {
+            System.out.println("Es un automata AFND con transicion E");
+
+            i = buscarPosEstado(EstadoInicialAFND.getId());
+
+            for (int j = 0; j < transicionesAFND[i].length; j++) {
+                if (transicionesAFND[i][j].contains("E")) {
+                    InitialStateAFD.getStates().add(estadosAFND.get(j));
+                    buscarLambdaConeccion(InitialStateAFD, j);
+                }
             }
+        } else {
+            InitialStateAFD.getStates().add(EstadoInicialAFND);
         }
 
         InitialStateAFD.setIdStateFrom("0");
@@ -179,23 +218,6 @@ public class Model {
             }
         }
 
-        estadosAFD.stream().forEach((AFDstate) -> {
-            if (AFDstate.isEsEstadoInicial()) {
-                System.out.print("Este estado es inicial\t");
-            }
-            if (AFDstate.isEsEstadoFinal()) {
-                System.out.print("Este estado es final\t");
-            }
-            System.out.println(AFDstate.getStates());
-        });
-        System.out.println("Hola");
-        System.out.println("Hola");
-        System.out.println("Hola");
-        System.out.println("Hola");
-        System.out.println("Hola");
-        System.out.println("Hola");
-        
-
     }
 
     public void buscarLambdaConeccion(EstadoAFD stateInit, int posBusqueda) {
@@ -248,6 +270,33 @@ public class Model {
         return id;
     }
 
+    public void cargarAFD() {
+        estadosAFND.stream().map((estadosAFND1) -> {
+            EstadoAFD estado = new EstadoAFD();
+            estado.setEsEstadoFinal(estadosAFND1.isIsFinal());
+            estado.setEsEstadoInicial(estadosAFND1.isIsInitial());
+            estado.setIdStateFrom(estadosAFND1.getId());
+            estado.setIdStateTo(estadosAFND1.getId());
+            return estado;
+        }).forEach((estado) -> {
+            estadosAFD.add(estado);
+        });
+
+        for (int i = 0; i < estadosAFND.size(); i++) {
+            for (int j = 0; j < estadosAFND.size(); j++) {
+                if (!transicionesAFND[i][j].isEmpty()) {
+                    EstadoAFD estado = new EstadoAFD();
+                    estado.setEsEstadoFinal(estadosAFND.get(i).isIsFinal());
+                    estado.setEsEstadoInicial(estadosAFND.get(i).isIsInitial());
+                    estado.setIdStateFrom(estadosAFND.get(i).getId());
+                    estado.setIdStateTo(estadosAFND.get(j).getId());
+                    estado.setLetter(transicionesAFND[i][j].get(0));
+                    transicionesAFD.add(estado);
+                }
+            }
+        }
+    }
+
     public boolean esEstadoFinal(EstadoAFD estado) {
         boolean esFinal = false;
         for (EstadoAFND estadosFinal : estadosFinalesAFND) {
@@ -258,43 +307,46 @@ public class Model {
         }
         return esFinal;
     }
-    
-    public void minimizeAFD(){
+
+    public void minimizeAFD() {
         this.divideAFD();
         this.transformSubConjuntos();
         subConjuntos.stream().forEach((AFDList) -> {
             System.out.println("SubConjunto" + AFDList);
         });
     }
-    
-    
-    public void divideAFD(){
-         transicionesAFD.stream().forEach((AFDstate) -> {
-            if (AFDstate.isEsEstadoFinal()) finalStates.add(AFDstate);
-            else noFinalStates.add(AFDstate);
+
+    public void divideAFD() {
+        transicionesAFD.stream().forEach((AFDstate) -> {
+            if (AFDstate.isEsEstadoFinal()) {
+                finalStates.add(AFDstate);
+            } else {
+                noFinalStates.add(AFDstate);
+            }
         });
-         subConjuntos.add(noFinalStates);
-         subConjuntos.add(finalStates);
+        subConjuntos.add(noFinalStates);
+        subConjuntos.add(finalStates);
     }
-    
-    public void transformSubConjuntos(){
+
+    public void transformSubConjuntos() {
         subConjuntos.stream().forEach((AFDList) -> {
             AFDList.stream().forEach((AFDstate) -> {
-                if (this.isInOtherSubconjunto(AFDstate,AFDList))
+                if (this.isInOtherSubconjunto(AFDstate, AFDList)) {
                     auxStates.clear();
-                    auxStates.add(AFDstate);
+                }
+                auxStates.add(AFDstate);
             });
         });
         subConjuntos.add(auxStates);
     }
-    
+
     public boolean isInOtherSubconjunto(EstadoAFD estado, ArrayList<EstadoAFD> currentList) {
         boolean isInOther = false;
-        for(ArrayList<EstadoAFD> subConjunto : subConjuntos) {
-            if (subConjunto!=currentList){
-                for(EstadoAFD estado1 : subConjunto){
-                    if(estado.getIdStateFrom().equals(estado1.getIdStateFrom())){
-                        isInOther = true ;
+        for (ArrayList<EstadoAFD> subConjunto : subConjuntos) {
+            if (subConjunto != currentList) {
+                for (EstadoAFD estado1 : subConjunto) {
+                    if (estado.getIdStateFrom().equals(estado1.getIdStateFrom())) {
+                        isInOther = true;
                         //subConjunto.remove(estado1);
                     }
                 }

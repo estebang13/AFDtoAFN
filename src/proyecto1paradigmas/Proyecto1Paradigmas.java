@@ -15,9 +15,7 @@ public class Proyecto1Paradigmas {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Model.Model.getInstanceOf().cargarAFND();
-        Model.Model.getInstanceOf().convertirAFNDaAFD();
-        Model.Model.getInstanceOf().minimizeAFD();
+        Model.Model.getInstanceOf().ejecutarPrograma();
     }
 
 }
