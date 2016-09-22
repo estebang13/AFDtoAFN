@@ -34,6 +34,7 @@ public class Model {
     private ArrayList<EstadoAFD> finalStates;
     private ArrayList<EstadoAFD> noFinalStates;
     private ArrayList<EstadoAFD> auxStates;
+    private ArrayList<EstadoAFD> auxStates1;
     private ArrayList<ArrayList<EstadoAFD>> subConjuntos;
 
     private int contador;
@@ -48,6 +49,7 @@ public class Model {
         this.noFinalStates = new ArrayList<>();
         this.subConjuntos = new ArrayList<>();
         this.auxStates = new ArrayList<>();
+        this.auxStates1 = new ArrayList<>();
         this.esAFND = false;
         this.tieneEpsilon = false;
         this.contador = 0;
@@ -62,9 +64,11 @@ public class Model {
         if (esAFND) {
             System.out.println("Es un automata AFND");
             convertirAFNDaAFD();
+            this.minimizeAFD();
         } else {
             System.out.println("Es un automata AFD");
             cargarAFD();
+            this.minimizeAFD();
         }
 
 //        estadosAFD.stream().forEach((AFDstate) -> {
@@ -84,7 +88,7 @@ public class Model {
 
     public void cargarAFND() {
         SAXBuilder builder = new SAXBuilder();
-        File xmlFile = new File("C:\\Users\\brgma_000\\Desktop\\ejemploAFD.jff");
+        File xmlFile = new File("/Users/estebanguerrero/Desktop/Proyecto1Paradigmas/ejemploAFD.jff");
         try {
             Document document = (Document) builder.build(xmlFile);
             Element rootNode = document.getRootElement();
@@ -308,51 +312,58 @@ public class Model {
         return esFinal;
     }
 
-    public void minimizeAFD() {
+     public void minimizeAFD(){
         this.divideAFD();
         this.transformSubConjuntos();
-        subConjuntos.stream().forEach((AFDList) -> {
-            System.out.println("SubConjunto" + AFDList);
+            subConjuntos.stream().forEach((AFDstate) -> {
+                System.out.println("SubConjunto "+AFDstate);
         });
     }
-
-    public void divideAFD() {
-        transicionesAFD.stream().forEach((AFDstate) -> {
-            if (AFDstate.isEsEstadoFinal()) {
-                finalStates.add(AFDstate);
-            } else {
-                noFinalStates.add(AFDstate);
-            }
+    
+    // Divide el AFD en los estados finales y no finales
+    public void divideAFD(){
+         transicionesAFD.stream().forEach((AFDstate) -> {
+            if (AFDstate.isEsEstadoFinal()) finalStates.add(AFDstate);
+            else noFinalStates.add(AFDstate);
         });
-        subConjuntos.add(noFinalStates);
-        subConjuntos.add(finalStates);
+         subConjuntos.add(noFinalStates);
+         subConjuntos.add(finalStates);
     }
-
-    public void transformSubConjuntos() {
-        subConjuntos.stream().forEach((AFDList) -> {
-            AFDList.stream().forEach((AFDstate) -> {
-                if (this.isInOtherSubconjunto(AFDstate, AFDList)) {
+    
+    //Este metodo recorre todos los subconjuntos y los divide segun sea necesario para despues armar los nuevos estados
+    public void transformSubConjuntos(){
+        for(int i = subConjuntos.size()-1; i > -1; i--){
+            for(int j = subConjuntos.get(i).size()-1; j > -1; j--){
+                System.out.println("get "+ subConjuntos.get(i).size() + "index " + j);
+                EstadoAFD a = new EstadoAFD();
+                a = subConjuntos.get(i).get(j);
+                if(this.isInOtherSubconjunto(a, subConjuntos.get(i))){
+                    if(subConjuntos.get(i).size() == 1 ) break;
+                    else{
                     auxStates.clear();
+                    System.out.println("Nuevo --> " + a);
+                    auxStates.add(a);
+                    subConjuntos.add(auxStates);
+                    subConjuntos.get(i).remove(a);
+                    }
+                    transformSubConjuntos(); // Se llama recursivamente a si mismo para sacar todos los estados
                 }
-                auxStates.add(AFDstate);
-            });
-        });
-        subConjuntos.add(auxStates);
+             }
+        }
     }
-
+    
+    // Verifica si el estado y su transicion para ver que no se encuentre en otro subconjunto
     public boolean isInOtherSubconjunto(EstadoAFD estado, ArrayList<EstadoAFD> currentList) {
         boolean isInOther = false;
-        for (ArrayList<EstadoAFD> subConjunto : subConjuntos) {
-            if (subConjunto != currentList) {
-                for (EstadoAFD estado1 : subConjunto) {
-                    if (estado.getIdStateFrom().equals(estado1.getIdStateFrom())) {
-                        isInOther = true;
-                        //subConjunto.remove(estado1);
+        for(int i = subConjuntos.size()-1; i > -1; i--) {
+            if (subConjuntos.get(i)!=currentList && subConjuntos.get(i).size() > 0){
+                for(int j = subConjuntos.get(i).size()-1; j > -1; j--){
+                    if(estado.getIdStateTo().equals(subConjuntos.get(i).get(j).getIdStateFrom()) ){
+                        isInOther = true ;
                     }
                 }
             }
         }
         return isInOther;
     }
-
 }
