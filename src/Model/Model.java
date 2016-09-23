@@ -48,8 +48,6 @@ public class Model {
         this.finalStates = new ArrayList<>();
         this.noFinalStates = new ArrayList<>();
         this.subConjuntos = new ArrayList<>();
-        this.auxStates = new ArrayList<>();
-        this.auxStates1 = new ArrayList<>();
         this.esAFND = false;
         this.tieneEpsilon = false;
         this.contador = 0;
@@ -353,9 +351,7 @@ public class Model {
                     }
                 }
                 if (!auxiliar.isEmpty()) {
-                    subConjuntos.get(j).removeAll(auxiliar);
-                    subConjuntos.add(auxiliar);
-                    return 0;
+
                 }
             }
         }
@@ -374,11 +370,13 @@ public class Model {
     // Verifica si el estado y su transicion para ver que no se encuentre en otro subconjunto
     public boolean isInOtherSubconjunto(EstadoAFD estado, ArrayList<EstadoAFD> currentList) {
         boolean isInOther = false;
-        for (int i = subConjuntos.size() - 1; i > -1; i--) {
-            if (subConjuntos.get(i) != currentList && subConjuntos.get(i).size() > 0) {
-                for (int j = subConjuntos.get(i).size() - 1; j > -1; j--) {
+        for (int i = 0; i < subConjuntos.size(); i++) {
+            this.auxStates = new ArrayList<>();
+            if (subConjuntos.get(i).size() > 1) {
+                for (int j = 0; j < subConjuntos.get(i).size(); j++) {
                     if (estado.getIdStateTo().equals(subConjuntos.get(i).get(j).getIdStateFrom())) {
                         isInOther = true;
+                        auxStates.add(subConjuntos.get(i).get(j));
                     }
                 }
             }
