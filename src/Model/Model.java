@@ -48,8 +48,6 @@ public class Model {
         this.finalStates = new ArrayList<>();
         this.noFinalStates = new ArrayList<>();
         this.subConjuntos = new ArrayList<>();
-        this.auxStates = new ArrayList<>();
-        this.auxStates1 = new ArrayList<>();
         this.esAFND = false;
         this.tieneEpsilon = false;
         this.contador = 0;
@@ -322,44 +320,45 @@ public class Model {
     
     // Divide el AFD en los estados finales y no finales
     public void divideAFD(){
-         transicionesAFD.stream().forEach((AFDstate) -> {
+         estadosAFD.stream().forEach((AFDstate) -> {
             if (AFDstate.isEsEstadoFinal()) finalStates.add(AFDstate);
             else noFinalStates.add(AFDstate);
         });
+         System.out.println("Estados " + estadosAFD);
          subConjuntos.add(noFinalStates);
          subConjuntos.add(finalStates);
     }
     
     //Este metodo recorre todos los subconjuntos y los divide segun sea necesario para despues armar los nuevos estados
     public void transformSubConjuntos(){
+        boolean bandera = false;
         for(int i = subConjuntos.size()-1; i > -1; i--){
             for(int j = subConjuntos.get(i).size()-1; j > -1; j--){
-                System.out.println("get "+ subConjuntos.get(i).size() + "index " + j);
-                EstadoAFD a = new EstadoAFD();
-                a = subConjuntos.get(i).get(j);
-                if(this.isInOtherSubconjunto(a, subConjuntos.get(i))){
-                    if(subConjuntos.get(i).size() == 1 ) break;
+                if(this.isInOtherSubconjunto(subConjuntos.get(i).get(j), subConjuntos.get(i))){
+                    if(subConjuntos.get(i).size() == -1 && subConjuntos. size() == -1) bandera=true;
                     else{
-                    auxStates.clear();
-                    System.out.println("Nuevo --> " + a);
-                    auxStates.add(a);
+                    System.out.println("Nuevo--> " + auxStates);
                     subConjuntos.add(auxStates);
-                    subConjuntos.get(i).remove(a);
+                    subConjuntos.get(i).remove(subConjuntos.get(i).get(j));
                     }
-                    transformSubConjuntos(); // Se llama recursivamente a si mismo para sacar todos los estados
+                    if(bandera) break;
                 }
              }
+            if(bandera) break;
         }
+        if(bandera)transformSubConjuntos(); // Se llama recursivamente a si mismo para sacar todos los estados
     }
     
     // Verifica si el estado y su transicion para ver que no se encuentre en otro subconjunto
     public boolean isInOtherSubconjunto(EstadoAFD estado, ArrayList<EstadoAFD> currentList) {
         boolean isInOther = false;
         for(int i = subConjuntos.size()-1; i > -1; i--) {
-            if (subConjuntos.get(i)!=currentList && subConjuntos.get(i).size() > 0){
+            this.auxStates = new ArrayList<>();
+            if (subConjuntos.get(i).size() > 0){
                 for(int j = subConjuntos.get(i).size()-1; j > -1; j--){
                     if(estado.getIdStateTo().equals(subConjuntos.get(i).get(j).getIdStateFrom()) ){
                         isInOther = true ;
+                        auxStates.add(subConjuntos.get(i).get(j));
                     }
                 }
             }
