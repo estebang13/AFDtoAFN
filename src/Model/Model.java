@@ -332,10 +332,10 @@ public class Model {
     //Este metodo recorre todos los subconjuntos y los divide segun sea necesario para despues armar los nuevos estados
     public void transformSubConjuntos(){
         boolean bandera = false;
-        for(int i = subConjuntos.size()-1; i > -1; i--){
-            for(int j = subConjuntos.get(i).size()-1; j > -1; j--){
+        for(int i = 0; i < subConjuntos.size(); i++){
+            for(int j = 0; j <  subConjuntos.get(i).size(); j++){
                 if(this.isInOtherSubconjunto(subConjuntos.get(i).get(j), subConjuntos.get(i))){
-                    if(subConjuntos.get(i).size() == -1 && subConjuntos. size() == -1) bandera=true;
+                    if(subConjuntos.get(i).size() == -1 && subConjuntos. size()==-1) bandera=true;
                     else{
                     System.out.println("Nuevo--> " + auxStates);
                     subConjuntos.add(auxStates);
@@ -352,10 +352,10 @@ public class Model {
     // Verifica si el estado y su transicion para ver que no se encuentre en otro subconjunto
     public boolean isInOtherSubconjunto(EstadoAFD estado, ArrayList<EstadoAFD> currentList) {
         boolean isInOther = false;
-        for(int i = subConjuntos.size()-1; i > -1; i--) {
+        for(int i = 0; i < subConjuntos.size(); i++) {
             this.auxStates = new ArrayList<>();
-            if (subConjuntos.get(i).size() > 0){
-                for(int j = subConjuntos.get(i).size()-1; j > -1; j--){
+            if (subConjuntos.get(i).size() > 1){
+                for(int j = 0; j <  subConjuntos.get(i).size(); j++){
                     if(estado.getIdStateTo().equals(subConjuntos.get(i).get(j).getIdStateFrom()) ){
                         isInOther = true ;
                         auxStates.add(subConjuntos.get(i).get(j));
