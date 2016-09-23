@@ -314,7 +314,9 @@ public class Model {
     public void minimizeAFD() {
         this.divideAFD();
         this.transformSubConjuntos();
+        this.transformSubConjuntos();
         System.out.println(subConjuntos);
+
 //        subConjuntos.stream().forEach((AFDstate) -> {
 //            System.out.println("SubConjunto " + AFDstate);
 //        });
@@ -330,6 +332,7 @@ public class Model {
             }
         });
         subConjuntos.add(noFinalStates);
+        subConjuntos.add(finalStates);
     }
 
     //Este metodo recorre todos los subconjuntos y los divide segun sea necesario para despues armar los nuevos estados
@@ -337,21 +340,30 @@ public class Model {
         for (int i = 0; i < alfabeto.size(); i++) {
             for (int j = 0; j < subConjuntos.size(); j++) {
                 ArrayList<EstadoAFD> auxiliar = new ArrayList<>();
-                for (int k = 0; k < subConjuntos.get(j).size(); k++) {
-                    for (int l = 0; l < transicionesAFD.size(); l++) {
-                        if (subConjuntos.get(j).get(k).getIdStateFrom().equals(transicionesAFD.get(l).getIdStateFrom())) {
-                            if (transicionesAFD.get(l).getLetter().equals(alfabeto.get(i))) {
-                                EstadoAFD estado = getEstadoId(subConjuntos.get(j).get(k).getIdStateTo());
-                                if (!subConjuntos.get(j).contains(estado)) {
-                                    System.out.println("no contiene");
-                                    auxiliar.add(estado);
+                if (subConjuntos.get(j).size() > 1) {
+                    for (int k = 0; k < subConjuntos.get(j).size(); k++) {
+                        for (int l = 0; l < transicionesAFD.size(); l++) {
+                            if (subConjuntos.get(j).get(k).getIdStateFrom().equals(transicionesAFD.get(l).getIdStateFrom())) {
+                                if (transicionesAFD.get(l).getLetter().equals(alfabeto.get(i))) {
+                                    EstadoAFD estado = getEstadoId(transicionesAFD.get(l).getIdStateTo());
+                                    if (!subConjuntos.get(j).contains(estado)) {
+                                        auxiliar.add(subConjuntos.get(j).get(k));
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 if (!auxiliar.isEmpty()) {
-
+                    ArrayList<EstadoAFD> auxiliar1 = new ArrayList<>();
+                    auxiliar1.addAll(auxiliar);
+                    for (EstadoAFD auxiliar2 : auxiliar1) {
+                        subConjuntos.get(j).remove(auxiliar2);
+                    }
+                    auxiliar.clear();
+                    subConjuntos.add(auxiliar1);
+                    return 0;
                 }
             }
         }
