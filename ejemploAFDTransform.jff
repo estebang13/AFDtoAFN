@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<structure>
+  <type>fa</type>
+  <automaton>
+    <transition>
+      <from>0</from>
+      <to>1</to>
+      <read>a</read>
+    </transition>
+    <transition>
+      <from>0</from>
+      <to>0</to>
+      <read>b</read>
+    </transition>
+    <state id="0" name="q0">
+      <initial />
+      <initial />
+    </state>
+    <transition>
+      <from>4</from>
+      <to>0</to>
+      <read>b</read>
+    </transition>
+    <transition>
+      <from>4</from>
+      <to>1</to>
+      <read>a</read>
+    </transition>
+    <state id="4" name="q4">
+      <final />
+      <final />
+    </state>
+    <transition>
+      <from>3</from>
+      <to>1</to>
+      <read>a</read>
+    </transition>
+    <transition>
+      <from>3</from>
+      <to>4</to>
+      <read>b</read>
+    </transition>
+    <state id="3" name="q3" />
+    <transition>
+      <from>1</from>
+      <to>1</to>
+      <read>a</read>
+    </transition>
+    <transition>
+      <from>1</from>
+      <to>3</to>
+      <read>b</read>
+    </transition>
+    <state id="1" name="q1" />
+  </automaton>
+</structure>

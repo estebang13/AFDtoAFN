@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.regex.Pattern;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -40,6 +41,7 @@ public class Model {
     private ArrayList<EstadoAFD> auxStates;
     private ArrayList<EstadoAFD> auxStates1;
     private ArrayList<ArrayList<EstadoAFD>> subConjuntos;
+    String urlFile;
     SAXBuilder builder;
     File xmlFile;
 
@@ -63,8 +65,9 @@ public class Model {
         return (model == null) ? model = new Model() : model;
     }
 
-    public void ejecutarPrograma() {
-        cargarAFND("/Users/estebanguerrero/Desktop/Proyecto1Paradigmas/ejemploAFD.jff");
+    public void ejecutarPrograma(String url) {
+        cargarAFND(url);
+        urlFile = url;
         if (esAFND) {
             System.out.println("Es un automata AFND");
             convertirAFNDaAFD();
@@ -422,7 +425,9 @@ public class Model {
             doc.getRootElement().addContent(automaton);
             XMLOutputter xmlOutput = new XMLOutputter();
             xmlOutput.setFormat(Format.getPrettyFormat());
-            xmlOutput.output(doc, new FileWriter("/Users/estebanguerrero/Desktop/Proyecto1Paradigmas/ejemploAFDMin1.jff"));
+            String[] parts = urlFile.split(Pattern.quote(".")); 
+            String a = parts[0];
+            xmlOutput.output(doc, new FileWriter(a+"Transform.jff"));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
