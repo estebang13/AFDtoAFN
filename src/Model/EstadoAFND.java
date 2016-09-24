@@ -7,7 +7,7 @@ package Model;
 
 /**
  *
- * @author brgma_000
+ * @author Bryan Gonzalez Marchena y Esteban Guerrero Gutierrez
  */
 public class EstadoAFND {
 

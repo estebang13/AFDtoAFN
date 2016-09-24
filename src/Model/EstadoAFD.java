@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author brgma_000
+ * @author Bryan Gonzalez Marchena y Esteban Guerrero Gutierrez
  */
 public class EstadoAFD {
 

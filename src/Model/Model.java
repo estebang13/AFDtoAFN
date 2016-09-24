@@ -21,7 +21,7 @@ import org.jdom2.output.XMLOutputter;
 
 /**
  *
- * @author brgma_000
+ * @author Bryan Gonzalez Marchena y Esteban Guerrero Gutierrez
  */
 public class Model {
 
@@ -64,7 +64,7 @@ public class Model {
     }
 
     public void ejecutarPrograma() {
-        cargarAFND("C:\\Users\\brgma_000\\Desktop\\ejemploAFD.jff");
+        cargarAFND("/Users/estebanguerrero/Desktop/Proyecto1Paradigmas/ejemploAFD.jff");
         if (esAFND) {
             System.out.println("Es un automata AFND");
             convertirAFNDaAFD();
@@ -77,6 +77,7 @@ public class Model {
         createXML();
     }
 
+    //Este metodo genera la carga de un automata deterministico no deterministico
     public void cargarAFND(String url) {
         builder = new SAXBuilder();
         xmlFile = new File(url);
@@ -137,6 +138,7 @@ public class Model {
         }
     }
 
+    //Metodo principal encargado de convertir un automata finito no deterministico en un automata finito deterministico
     public void convertirAFNDaAFD() {
         int posInicio = (tieneEpsilon) ? 1 : 0;
 
@@ -235,6 +237,7 @@ public class Model {
         }
     }
 
+    
     public void buscarLetraConeccion(EstadoAFD state, int posBusqueda, String letra) {
         for (int j = 0; j < transicionesAFND[posBusqueda].length; j++) {
             if (transicionesAFND[posBusqueda][j].contains(letra)) {
@@ -243,6 +246,7 @@ public class Model {
         }
     }
 
+    // Metodo encargado de buscar por medio del id del estado
     public int buscarPosEstado(String idEstado) {
         int pos = 0;
         for (int i = 0; i < estadosAFND.size(); i++) {
@@ -254,6 +258,7 @@ public class Model {
         return pos;
     }
 
+    //Metodo que busca un estado entre los estados de automatas deterministicos
     public String buscarEstado(ArrayList<EstadoAFND> groupStates) {
         String id = "";
         for (EstadoAFD AFNstate : estadosAFD) {
@@ -264,7 +269,8 @@ public class Model {
         }
         return id;
     }
-
+    
+    //Este metodo corrobora si el estado es final o no
     public boolean esEstadoFinal(EstadoAFD estado) {
         boolean esFinal = false;
         for (EstadoAFND estadosFinal : estadosFinalesAFND) {
@@ -275,7 +281,8 @@ public class Model {
         }
         return esFinal;
     }
-
+    
+    // Metodo encargado de hacer la carga del automata finito deterministico
     public void cargarAFD() {
         estadosAFND.stream().map((estadosAFND1) -> {
             EstadoAFD estado = new EstadoAFD();
@@ -303,10 +310,12 @@ public class Model {
         }
     }
 
+    //Metodo principal encargado de minimizar el automata
     public void minimizeAFD() {
         this.divideAFD();
         this.transformSubConjuntos();
         this.createXML();
+        System.out.println(transicionesAFD);
     }
 
     // Divide el AFD en los estados finales y no finales
@@ -369,6 +378,7 @@ public class Model {
         }
     }
 
+    // Este metodo obtiene en id de un estado en especifico
     public EstadoAFD getEstadoId(String idEstado) {
         for (EstadoAFD estadosAFD1 : estadosAFD) {
             if (idEstado.equals(estadosAFD1.getIdStateFrom())) {
@@ -378,44 +388,57 @@ public class Model {
         return null;
     }
 
+    //Este metodo se encargar de convertir el Array en el XML para ser leido por JFLAP
     public void createXML() {
-
         try {
-
-            Element structure = new Element("company");
+            Element structure = new Element("structure");
             Document doc = new Document(structure);
-
+            structure.addContent(new Element("type").setText("fa"));
             Element automaton = new Element("automaton");
-
-            System.out.println(subConjuntos);
-
             for (int i = 0; i < subConjuntos.size(); i++) {
-
                 Element state = new Element("state");
                 state.setAttribute(new Attribute("id", subConjuntos.get(i).get(0).getIdStateFrom()));
                 state.setAttribute(new Attribute("name", "q" + subConjuntos.get(i).get(0).getIdStateFrom()));
-
                 for (int j = 0; j < transicionesAFD.size(); j++) {
                     if (subConjuntos.get(i).get(0).getIdStateFrom() == transicionesAFD.get(j).getIdStateFrom()) {
                         if (transicionesAFD.get(j).isEsEstadoInicial()) {
                             state.addContent(new Element("initial"));
-                            break;
                         }
-                        System.out.println("Transaccion " + transicionesAFD.get(j));
+                        if (transicionesAFD.get(j).isEsEstadoFinal()) {
+                            state.addContent(new Element("final"));
+                        }
+                        if(isNotInSubconjuntos(transicionesAFD.get(j).getIdStateTo())){
+                           transicionesAFD.get(j).setIdStateTo(transicionesAFD.get(j).getIdStateFrom());
+                        }
+                        Element transition = new Element("transition");
+                        transition.addContent(new Element("from").setText(transicionesAFD.get(j).getIdStateFrom()));
+                        transition.addContent(new Element("to").setText(transicionesAFD.get(j).getIdStateTo()));
+                        transition.addContent(new Element("read").setText(transicionesAFD.get(j).getLetter()));
+                        automaton.addContent(transition);
                     }
                 }
-                automaton.addContent(state);
+                automaton.addContent(state);                
             }
-
             doc.getRootElement().addContent(automaton);
             XMLOutputter xmlOutput = new XMLOutputter();
-
-            // display nice nice
             xmlOutput.setFormat(Format.getPrettyFormat());
-            xmlOutput.output(doc, new FileWriter("C:\\Users\\brgma_000\\Desktop\\ejemploAFDMin.jff"));
-
+            xmlOutput.output(doc, new FileWriter("/Users/estebanguerrero/Desktop/Proyecto1Paradigmas/ejemploAFDMin1.jff"));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+    }
+    
+    //Este metodo corrobora la existencia de las transiciones.
+    public boolean isNotInSubconjuntos(String to){
+        boolean isNotInSubconjuntos = false;
+        for(int i = 0; i < subConjuntos.size(); i ++){
+            if(subConjuntos.get(i).get(0).getIdStateFrom() != to ){
+                 isNotInSubconjuntos = true;
+            }else{
+                isNotInSubconjuntos = false;
+                break;
+            }     
+        }
+        return isNotInSubconjuntos;
     }
 }
