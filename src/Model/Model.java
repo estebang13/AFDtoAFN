@@ -240,7 +240,6 @@ public class Model {
         }
     }
 
-    
     public void buscarLetraConeccion(EstadoAFD state, int posBusqueda, String letra) {
         for (int j = 0; j < transicionesAFND[posBusqueda].length; j++) {
             if (transicionesAFND[posBusqueda][j].contains(letra)) {
@@ -272,7 +271,7 @@ public class Model {
         }
         return id;
     }
-    
+
     //Este metodo corrobora si el estado es final o no
     public boolean esEstadoFinal(EstadoAFD estado) {
         boolean esFinal = false;
@@ -284,7 +283,7 @@ public class Model {
         }
         return esFinal;
     }
-    
+
     // Metodo encargado de hacer la carga del automata finito deterministico
     public void cargarAFD() {
         estadosAFND.stream().map((estadosAFND1) -> {
@@ -337,7 +336,8 @@ public class Model {
     //Este metodo recorre todos los subconjuntos y los divide segun sea necesario para despues armar los nuevos estados
     public void transformSubConjuntos() {
         boolean bandera = false;
-        for (int i = 0; i < alfabeto.size(); i++) {
+        int aux = (tieneEpsilon) ? 1 : 0;
+        for (int i = aux; i < alfabeto.size(); i++) {
             for (int j = 0; j < subConjuntos.size(); j++) {
                 ArrayList<EstadoAFD> auxiliar = new ArrayList<>();
                 EstadoAFD estadoToComun = new EstadoAFD();
@@ -348,10 +348,10 @@ public class Model {
                             if (subConjuntos.get(j).get(k).getIdStateFrom().equals(transicionesAFD1.getIdStateFrom())) {
                                 if (transicionesAFD1.getLetter().equals(alfabeto.get(i))) {
                                     EstadoAFD estado = getEstadoId(transicionesAFD1.getIdStateTo());
-                                    if (estadoToComun.getIdStateFrom().equals("comun")) {
+                                    if (estadoToComun.getIdStateFrom().equals("comun") && estado != null) {
                                         estadoToComun = estado;
                                     }
-                                    if (!subConjuntos.get(j).contains(estado)) {
+                                    if (estado != null && !subConjuntos.get(j).contains(estado)) {
                                         if (estado != estadoToComun) {
                                             auxiliar.add(subConjuntos.get(j).get(k));
                                             break;
@@ -376,7 +376,9 @@ public class Model {
             }
             if (bandera) {
                 bandera = false;
-                i = -1;
+                aux = (tieneEpsilon) ? 1 : 0;
+                aux--;
+                i = aux;
             }
         }
     }
@@ -410,8 +412,8 @@ public class Model {
                         if (transicionesAFD.get(j).isEsEstadoFinal()) {
                             state.addContent(new Element("final"));
                         }
-                        if(isNotInSubconjuntos(transicionesAFD.get(j).getIdStateTo())){
-                           transicionesAFD.get(j).setIdStateTo(transicionesAFD.get(j).getIdStateFrom());
+                        if (isNotInSubconjuntos(transicionesAFD.get(j).getIdStateTo())) {
+                            transicionesAFD.get(j).setIdStateTo(transicionesAFD.get(j).getIdStateFrom());
                         }
                         Element transition = new Element("transition");
                         transition.addContent(new Element("from").setText(transicionesAFD.get(j).getIdStateFrom()));
@@ -420,29 +422,29 @@ public class Model {
                         automaton.addContent(transition);
                     }
                 }
-                automaton.addContent(state);                
+                automaton.addContent(state);
             }
             doc.getRootElement().addContent(automaton);
             XMLOutputter xmlOutput = new XMLOutputter();
             xmlOutput.setFormat(Format.getPrettyFormat());
-            String[] parts = urlFile.split(Pattern.quote(".")); 
+            String[] parts = urlFile.split(Pattern.quote("."));
             String a = parts[0];
-            xmlOutput.output(doc, new FileWriter(a+"Transform.jff"));
+            xmlOutput.output(doc, new FileWriter(a + "Transform.jff"));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
-    
+
     //Este metodo corrobora la existencia de las transiciones.
-    public boolean isNotInSubconjuntos(String to){
+    public boolean isNotInSubconjuntos(String to) {
         boolean isNotInSubconjuntos = false;
-        for(int i = 0; i < subConjuntos.size(); i ++){
-            if(subConjuntos.get(i).get(0).getIdStateFrom() != to ){
-                 isNotInSubconjuntos = true;
-            }else{
+        for (int i = 0; i < subConjuntos.size(); i++) {
+            if (subConjuntos.get(i).get(0).getIdStateFrom() != to) {
+                isNotInSubconjuntos = true;
+            } else {
                 isNotInSubconjuntos = false;
                 break;
-            }     
+            }
         }
         return isNotInSubconjuntos;
     }
