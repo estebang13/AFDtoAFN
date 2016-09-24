@@ -36,6 +36,8 @@ public class Model {
     private ArrayList<EstadoAFD> auxStates;
     private ArrayList<EstadoAFD> auxStates1;
     private ArrayList<ArrayList<EstadoAFD>> subConjuntos;
+    SAXBuilder builder;
+    File xmlFile;
 
     private int contador;
 
@@ -58,36 +60,20 @@ public class Model {
     }
 
     public void ejecutarPrograma() {
-        cargarAFND();
+        cargarAFND("C:\\Users\\brgma_000\\Desktop\\ejemploAFD.jff");
         if (esAFND) {
             System.out.println("Es un automata AFND");
             convertirAFNDaAFD();
-            this.minimizeAFD();
         } else {
             System.out.println("Es un automata AFD");
             cargarAFD();
         }
-
         this.minimizeAFD();
-
-//        estadosAFD.stream().forEach((AFDstate) -> {
-//            if (AFDstate.isEsEstadoInicial()) {
-//                System.out.print("Este estado es inicial\t");
-//            }
-//            if (AFDstate.isEsEstadoFinal()) {
-//                System.out.print("Este estado es final\t");
-//            }
-//        });
-//
-//        transicionesAFD.stream().forEach((AFDstate) -> {
-//            System.out.println("From: " + AFDstate.getIdStateFrom() + ", To:" + AFDstate.getIdStateTo()
-//                    + " with: " + AFDstate.getLetter());
-//        });
     }
 
-    public void cargarAFND() {
-        SAXBuilder builder = new SAXBuilder();
-        File xmlFile = new File("C:\\Users\\brgma_000\\Desktop\\ejemploAFD.jff");
+    public void cargarAFND(String url) {
+        builder = new SAXBuilder();
+        xmlFile = new File(url);
         try {
             Document document = (Document) builder.build(xmlFile);
             Element rootNode = document.getRootElement();
@@ -314,11 +300,6 @@ public class Model {
     public void minimizeAFD() {
         this.divideAFD();
         this.transformSubConjuntos();
-        System.out.println(subConjuntos);
-
-//        subConjuntos.stream().forEach((AFDstate) -> {
-//            System.out.println("SubConjunto " + AFDstate);
-//        });
     }
 
     // Divide el AFD en los estados finales y no finales
@@ -344,10 +325,10 @@ public class Model {
                 estadoToComun.setIdStateFrom("comun");
                 if (subConjuntos.get(j).size() > 1) {
                     for (int k = 0; k < subConjuntos.get(j).size(); k++) {
-                        for (int l = 0; l < transicionesAFD.size(); l++) {
-                            if (subConjuntos.get(j).get(k).getIdStateFrom().equals(transicionesAFD.get(l).getIdStateFrom())) {
-                                if (transicionesAFD.get(l).getLetter().equals(alfabeto.get(i))) {
-                                    EstadoAFD estado = getEstadoId(transicionesAFD.get(l).getIdStateTo());
+                        for (EstadoAFD transicionesAFD1 : transicionesAFD) {
+                            if (subConjuntos.get(j).get(k).getIdStateFrom().equals(transicionesAFD1.getIdStateFrom())) {
+                                if (transicionesAFD1.getLetter().equals(alfabeto.get(i))) {
+                                    EstadoAFD estado = getEstadoId(transicionesAFD1.getIdStateTo());
                                     if (estadoToComun.getIdStateFrom().equals("comun")) {
                                         estadoToComun = estado;
                                     }
@@ -382,9 +363,9 @@ public class Model {
     }
 
     public EstadoAFD getEstadoId(String idEstado) {
-        for (int i = 0; i < estadosAFD.size(); i++) {
-            if (idEstado.equals(estadosAFD.get(i).getIdStateFrom())) {
-                return estadosAFD.get(i);
+        for (EstadoAFD estadosAFD1 : estadosAFD) {
+            if (idEstado.equals(estadosAFD1.getIdStateFrom())) {
+                return estadosAFD1;
             }
         }
         return null;
