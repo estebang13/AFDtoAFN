@@ -69,25 +69,11 @@ public class Model {
         }
 
         this.minimizeAFD();
-
-//        estadosAFD.stream().forEach((AFDstate) -> {
-//            if (AFDstate.isEsEstadoInicial()) {
-//                System.out.print("Este estado es inicial\t");
-//            }
-//            if (AFDstate.isEsEstadoFinal()) {
-//                System.out.print("Este estado es final\t");
-//            }
-//        });
-//
-//        transicionesAFD.stream().forEach((AFDstate) -> {
-//            System.out.println("From: " + AFDstate.getIdStateFrom() + ", To:" + AFDstate.getIdStateTo()
-//                    + " with: " + AFDstate.getLetter());
-//        });
     }
 
     public void cargarAFND() {
         SAXBuilder builder = new SAXBuilder();
-        File xmlFile = new File("C:\\Users\\brgma_000\\Desktop\\ejemploAFD.jff");
+        File xmlFile = new File("/Users/estebanguerrero/Desktop/Proyecto1Paradigmas/ejemploAFD.jff");
         try {
             Document document = (Document) builder.build(xmlFile);
             Element rootNode = document.getRootElement();
@@ -314,11 +300,7 @@ public class Model {
     public void minimizeAFD() {
         this.divideAFD();
         this.transformSubConjuntos();
-        System.out.println(subConjuntos);
-
-//        subConjuntos.stream().forEach((AFDstate) -> {
-//            System.out.println("SubConjunto " + AFDstate);
-//        });
+        this.createXML();
     }
 
     // Divide el AFD en los estados finales y no finales
@@ -389,4 +371,14 @@ public class Model {
         }
         return null;
     }
+    
+   public void createXML() {
+       for (int i = 0; i < subConjuntos.size() ; i++) {
+            System.out.println();
+            for(int j = 0; j < transicionesAFD.size() ; j++){
+                if(subConjuntos.get(i).get(0).getIdStateFrom() == transicionesAFD.get(j).getIdStateFrom())
+                  System.out.println("Transaccion " + transicionesAFD.get(j));
+            }
+        }
+   }
 }
