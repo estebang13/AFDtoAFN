@@ -314,7 +314,6 @@ public class Model {
     public void minimizeAFD() {
         this.divideAFD();
         this.transformSubConjuntos();
-        this.transformSubConjuntos();
         System.out.println(subConjuntos);
 
 //        subConjuntos.stream().forEach((AFDstate) -> {
@@ -336,19 +335,27 @@ public class Model {
     }
 
     //Este metodo recorre todos los subconjuntos y los divide segun sea necesario para despues armar los nuevos estados
-    public int transformSubConjuntos() {
+    public void transformSubConjuntos() {
+        boolean bandera = false;
         for (int i = 0; i < alfabeto.size(); i++) {
             for (int j = 0; j < subConjuntos.size(); j++) {
                 ArrayList<EstadoAFD> auxiliar = new ArrayList<>();
+                EstadoAFD estadoToComun = new EstadoAFD();
+                estadoToComun.setIdStateFrom("comun");
                 if (subConjuntos.get(j).size() > 1) {
                     for (int k = 0; k < subConjuntos.get(j).size(); k++) {
                         for (int l = 0; l < transicionesAFD.size(); l++) {
                             if (subConjuntos.get(j).get(k).getIdStateFrom().equals(transicionesAFD.get(l).getIdStateFrom())) {
                                 if (transicionesAFD.get(l).getLetter().equals(alfabeto.get(i))) {
                                     EstadoAFD estado = getEstadoId(transicionesAFD.get(l).getIdStateTo());
+                                    if (estadoToComun.getIdStateFrom().equals("comun")) {
+                                        estadoToComun = estado;
+                                    }
                                     if (!subConjuntos.get(j).contains(estado)) {
-                                        auxiliar.add(subConjuntos.get(j).get(k));
-                                        break;
+                                        if (estado != estadoToComun) {
+                                            auxiliar.add(subConjuntos.get(j).get(k));
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -363,11 +370,15 @@ public class Model {
                     }
                     auxiliar.clear();
                     subConjuntos.add(auxiliar1);
-                    return 0;
+                    bandera = true;
+                    break;
                 }
             }
+            if (bandera) {
+                bandera = false;
+                i = -1;
+            }
         }
-        return 0;
     }
 
     public EstadoAFD getEstadoId(String idEstado) {
@@ -377,22 +388,5 @@ public class Model {
             }
         }
         return null;
-    }
-
-    // Verifica si el estado y su transicion para ver que no se encuentre en otro subconjunto
-    public boolean isInOtherSubconjunto(EstadoAFD estado, ArrayList<EstadoAFD> currentList) {
-        boolean isInOther = false;
-        for (int i = 0; i < subConjuntos.size(); i++) {
-            this.auxStates = new ArrayList<>();
-            if (subConjuntos.get(i).size() > 1) {
-                for (int j = 0; j < subConjuntos.get(i).size(); j++) {
-                    if (estado.getIdStateTo().equals(subConjuntos.get(i).get(j).getIdStateFrom())) {
-                        isInOther = true;
-                        auxStates.add(subConjuntos.get(i).get(j));
-                    }
-                }
-            }
-        }
-        return isInOther;
     }
 }
