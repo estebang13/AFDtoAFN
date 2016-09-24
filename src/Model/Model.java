@@ -7,13 +7,17 @@ package Model;
 
 import java.util.List;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
+import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 /**
  *
@@ -69,6 +73,8 @@ public class Model {
             cargarAFD();
         }
         this.minimizeAFD();
+
+        createXML();
     }
 
     public void cargarAFND(String url) {
@@ -300,6 +306,7 @@ public class Model {
     public void minimizeAFD() {
         this.divideAFD();
         this.transformSubConjuntos();
+        this.createXML();
     }
 
     // Divide el AFD en los estados finales y no finales
@@ -369,5 +376,46 @@ public class Model {
             }
         }
         return null;
+    }
+
+    public void createXML() {
+
+        try {
+
+            Element structure = new Element("company");
+            Document doc = new Document(structure);
+
+            Element automaton = new Element("automaton");
+
+            System.out.println(subConjuntos);
+
+            for (int i = 0; i < subConjuntos.size(); i++) {
+
+                Element state = new Element("state");
+                state.setAttribute(new Attribute("id", subConjuntos.get(i).get(0).getIdStateFrom()));
+                state.setAttribute(new Attribute("name", "q" + subConjuntos.get(i).get(0).getIdStateFrom()));
+
+                for (int j = 0; j < transicionesAFD.size(); j++) {
+                    if (subConjuntos.get(i).get(0).getIdStateFrom() == transicionesAFD.get(j).getIdStateFrom()) {
+                        if (transicionesAFD.get(j).isEsEstadoInicial()) {
+                            state.addContent(new Element("initial"));
+                            break;
+                        }
+                        System.out.println("Transaccion " + transicionesAFD.get(j));
+                    }
+                }
+                automaton.addContent(state);
+            }
+
+            doc.getRootElement().addContent(automaton);
+            XMLOutputter xmlOutput = new XMLOutputter();
+
+            // display nice nice
+            xmlOutput.setFormat(Format.getPrettyFormat());
+            xmlOutput.output(doc, new FileWriter("C:\\Users\\brgma_000\\Desktop\\ejemploAFDMin.jff"));
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 }
