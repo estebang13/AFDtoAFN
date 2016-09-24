@@ -75,7 +75,15 @@ public class Model {
             System.out.println("Es un automata AFD");
             cargarAFD();
         }
+
+        System.out.println("Estados:");
+        System.out.println(estadosAFD);
+        System.out.println("Transiciones:");
+        System.out.println(transicionesAFD);
+
         this.minimizeAFD();
+
+        System.out.println(subConjuntos);
 
         createXML();
     }
@@ -124,7 +132,6 @@ public class Model {
                     tieneEpsilon = true;
                 } else {
                     transicionesAFND[buscarPosEstado(stateFrom)][buscarPosEstado(stateTo)].add(letter);
-                    System.out.println(transicionesAFND[buscarPosEstado(stateFrom)][buscarPosEstado(stateTo)]);
                     if (transicionesAFND[buscarPosEstado(stateFrom)][buscarPosEstado(stateTo)].size() > 1) {
                         esAFND = true;
                     }
@@ -207,7 +214,12 @@ public class Model {
                             id = String.valueOf(contador);
                             contador++;
                             tempState.setIdStateTo(id);
-                            estadosAFD.add(tempState);
+                            EstadoAFD tempState1 = new EstadoAFD();
+                            tempState1.setIdStateFrom(id);
+                            tempState1.setIdStateTo(id);
+                            tempState1.setEsEstadoFinal(tempState.isEsEstadoFinal());
+                            tempState1.getStates().addAll(tempCollection);
+                            estadosAFD.add(tempState1);
                         }
                         tempState.setIdStateTo(id);
                         tempState.setLetter(alfabeto.get(j));
@@ -317,7 +329,6 @@ public class Model {
         this.divideAFD();
         this.transformSubConjuntos();
         this.createXML();
-        System.out.println(transicionesAFD);
     }
 
     // Divide el AFD en los estados finales y no finales
@@ -406,7 +417,7 @@ public class Model {
                 state.setAttribute(new Attribute("name", "q" + subConjuntos.get(i).get(0).getIdStateFrom()));
                 for (int j = 0; j < transicionesAFD.size(); j++) {
                     if (subConjuntos.get(i).get(0).getIdStateFrom() == transicionesAFD.get(j).getIdStateFrom()) {
-                        if (transicionesAFD.get(j).isEsEstadoInicial()) {
+                        if (transicionesAFD.get(j).isEsEstadoInicial() || subConjuntos.get(i).get(0).isEsEstadoInicial()) {
                             state.addContent(new Element("initial"));
                         }
                         if (transicionesAFD.get(j).isEsEstadoFinal()) {
