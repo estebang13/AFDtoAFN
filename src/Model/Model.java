@@ -407,6 +407,7 @@ public class Model {
     //Este metodo se encargar de convertir el Array en el XML para ser leido por JFLAP
     public void createXML() {
         try {
+            addSubConjuntosToFirstState();
             Element structure = new Element("structure");
             Document doc = new Document(structure);
             structure.addContent(new Element("type").setText("fa"));
@@ -423,8 +424,8 @@ public class Model {
                         if (transicionesAFD.get(j).isEsEstadoFinal()) {
                             state.addContent(new Element("final"));
                         }
-                        if (isNotInSubconjuntos(transicionesAFD.get(j).getIdStateTo())) {
-                            transicionesAFD.get(j).setIdStateTo(transicionesAFD.get(j).getIdStateFrom());
+                        if (!isNotInSubconjuntos(transicionesAFD.get(j).getIdStateTo()).isEmpty()) {
+                            transicionesAFD.get(j).setIdStateTo(isNotInSubconjuntos(transicionesAFD.get(j).getIdStateTo()));
                         }
                         Element transition = new Element("transition");
                         transition.addContent(new Element("from").setText(transicionesAFD.get(j).getIdStateFrom()));
@@ -447,16 +448,30 @@ public class Model {
     }
 
     //Este metodo corrobora la existencia de las transiciones.
-    public boolean isNotInSubconjuntos(String to) {
+    public String isNotInSubconjuntos(String to) {
         boolean isNotInSubconjuntos = false;
+        String newTo = "";
         for (int i = 0; i < subConjuntos.size(); i++) {
-            if (subConjuntos.get(i).get(0).getIdStateFrom() != to) {
+            if (subConjuntos.get(i).get(0).getFinalStates().contains(to)) {
                 isNotInSubconjuntos = true;
-            } else {
-                isNotInSubconjuntos = false;
+                newTo = subConjuntos.get(i).get(0).getIdStateFrom();
                 break;
             }
         }
-        return isNotInSubconjuntos;
+        return newTo;
     }
+    
+    //Este metodo se encarga de acomodar los SubConjuntos.
+    public void addSubConjuntosToFirstState(){
+        for (int i = 0; i < subConjuntos.size(); i++) {
+            if (subConjuntos.get(i).size() > 0) {
+                for(int j=0; j < subConjuntos.get(i).size() ; j++){
+                    if(!subConjuntos.get(i).get(0).getFinalStates().contains(subConjuntos.get(i).get(j).getIdStateFrom())){
+                    subConjuntos.get(i).get(0).addState(subConjuntos.get(i).get(j).getIdStateFrom());
+                    }
+                }
+            }
+        }
+    }
+    
 }
