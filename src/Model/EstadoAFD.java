@@ -18,6 +18,7 @@ public class EstadoAFD {
     private boolean esEstadoInicial;
     private boolean esEstadoFinal;
     private ArrayList<EstadoAFND> states;
+    private ArrayList<String> finalStates;
     private String letter;
 
     public EstadoAFD() {
@@ -26,6 +27,7 @@ public class EstadoAFD {
         this.esEstadoInicial = false;
         this.esEstadoFinal = false;
         this.states = new ArrayList<>();
+        this.finalStates = new ArrayList<>();
         this.letter = "";
     }
 
@@ -73,8 +75,20 @@ public class EstadoAFD {
         return letter;
     }
 
+    public void setFinalStates(ArrayList<String> finalStates) {
+        this.finalStates = finalStates;
+    }
+
+    public ArrayList<String> getFinalStates() {
+        return finalStates;
+    }
+
     public void setLetter(String letter) {
         this.letter = letter;
+    }
+    
+    public void addState(String a){
+        finalStates.add(a);
     }
     
    @Override
